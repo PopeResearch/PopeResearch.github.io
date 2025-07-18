@@ -1,0 +1,11 @@
+---
+title: "SatisFunction"
+---
+
+Here you can find resources on the SatisFunction (Sexual Satisfaction and Function Survey Post-Vaginoplasty) scale:
+
+# Resources
+
+- [SatisFunction PDF version](files/SatisFunction.pdf)
+- [Scoring Guide](files/SatisFunction-Scoring-Guide.pdf)
+- [SatisFunction Web version](files/SatisFunction.html)

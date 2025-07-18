@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sexual Satisfaction and Function Survey Post-Vaginoplasty</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; }
+    h2 { color: #2a5d84; }
+    fieldset { margin-bottom: 25px; border: 1px solid #ccc; padding: 15px; }
+    legend { font-weight: bold; }
+    .question { margin-bottom: 12px; }
+    .domain-header { margin-top: 40px; color: #1d3b53; }
+    .results { background: #f0f7fa; padding: 15px; border-radius: 6px; margin-top: 30px; }
+    .score-table { border-collapse: collapse; margin-top: 10px; }
+    .score-table th, .score-table td { border: 1px solid #ccc; padding: 6px 12px; }
+    .score-table th { background: #e5f1fa; }
+    .submit-btn { background: #2a5d84; color: white; padding: 10px 18px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; }
+    .submit-btn:hover { background: #1d3b53; }
+    .instructions { background: #e5f1fa; padding: 12px 20px; border-radius: 6px; margin-bottom: 25px; }
+  </style>
+</head>
+<body>
+  <h1>Sexual Satisfaction and Function Survey Post-Vaginoplasty</h1>
+  <div class="instructions">
+    <strong>Instructions:</strong> For each question, select the response that best describes your experience. If a question does not apply to you or you prefer not to answer, you may skip it-skipped questions will be scored as 0.
+  </div>
+  <form id="survey-form">
+    <!-- Questions will be injected here -->
+  </form>
+  <button class="submit-btn" onclick="calculateScores(); return false;">Calculate Scores</button>
+  <div class="results" id="results" style="display:none;"></div>
+
+  <script>
+    // The survey JSON data
+    const survey = [
+      {
+        "question": "How comfortable are you with the physical appearance of your external genitalia?",
+        "domain": "Genital Self Image",
+        "response options": [
+          "Very comfortable",
+          "Slightly comfortable",
+          "Neither comfortable nor uncomfortable",
+          "Slightly uncomfortable",
+          "Very uncomfortable",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How comfortable do you or would you feel with your partner(s) seeing your external genitalia?",
+        "domain": "Genital Self Image",
+        "response options": [
+          "Very comfortable",
+          "Slightly comfortable",
+          "Neither comfortable nor uncomfortable",
+          "Slightly uncomfortable",
+          "Very uncomfortable",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How often does scarring interfere with how comfortable you are with the physical appearance of your external genitalia?",
+        "domain": "Genital Self Image",
+        "response options": [
+          "Never",
+          "Almost never",
+          "Sometimes",
+          "Almost always",
+          "Always",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "Compared to before your procedure, rate your gender dysphoria in relation to your genitalia. (gender dysphoria means discomfort or stress related to gender)",
+        "domain": "Genital Self Image",
+        "response options": [
+          "Much lower or absent",
+          "Lower",
+          "The same",
+          "Higher",
+          "Much higher",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How often do you feel sexual desire? (the feeling of wanting a sexual experience, feeling receptive to a partner's sexual initiation, or fantasizing about having sex)",
+        "domain": "Desire",
+        "response options": [
+          "Never",
+          "Almost never",
+          "Sometimes",
+          "Almost always",
+          "Always",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [-2, -1, 0, 1, 2, 0, 0]
+      },
+      {
+        "question": "How satisfied are you with your level of sexual desire?",
+        "domain": "Desire",
+        "response options": [
+          "Very satisfied",
+          "Slightly satisfied",
+          "Neither satisfied nor unsatisfied",
+          "Slightly unsatisfied",
+          "Very unsatisfied",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How satisfied are you with the frequency of your sexual arousal? (the mental/physical feelings of sexual excitement, warmth or tingling in the genitals, muscle contractions)",
+        "domain": "Arousal",
+        "response options": [
+          "Very satisfied",
+          "Slightly satisfied",
+          "Neither satisfied nor unsatisfied",
+          "Slightly unsatisfied",
+          "Very unsatisfied",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How would you rate the intensity of your sexual arousal?",
+        "domain": "Arousal",
+        "response options": [
+          "Very high",
+          "High",
+          "Not too high, Not too low",
+          "Low",
+          "Very low or absent",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How satisfied are you with the intensity of your sexual arousal?",
+        "domain": "Arousal",
+        "response options": [
+          "Very satisfied",
+          "Slightly satisfied",
+          "Neither satisfied nor unsatisfied",
+          "Slightly unsatisfied",
+          "Very unsatisfied",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How often do you feel secretions during sexual activity or intercourse without using lubricants? (engaging in sexual activity alone or with a partner)",
+        "domain": "Lubrication",
+        "response options": [
+          "Always",
+          "Almost always",
+          "Sometimes",
+          "Almost never",
+          "Never",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How often do you feel unwanted secretions outside of sexual activity or intercourse?",
+        "domain": "Lubrication",
+        "response options": [
+          "Always",
+          "Almost always",
+          "Sometimes",
+          "Almost never",
+          "Never",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [-2, -1, 0, 1, 2, 0, 0]
+      },
+      {
+        "question": "How often have you been able to have an orgasm when you wanted to?",
+        "domain": "Orgasm",
+        "response options": [
+          "Always",
+          "Almost always",
+          "Sometimes",
+          "Almost never",
+          "Never",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How satisfied do you feel with the quality of your orgasm during sexual stimulation and/or intercourse?",
+        "domain": "Orgasm",
+        "response options": [
+          "Very satisfied",
+          "Slightly satisfied",
+          "Neither satisfied nor unsatisfied",
+          "Slightly unsatisfied",
+          "Very unsatisfied",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How often have you been able to achieve an orgasm with vaginal penetration?",
+        "domain": "Orgasm",
+        "response options": [
+          "Always",
+          "Almost always",
+          "Sometimes",
+          "Almost never",
+          "Never",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How often have you been able to achieve an orgasm with clitoral stimulation?",
+        "domain": "Orgasm",
+        "response options": [
+          "Always",
+          "Almost always",
+          "Sometimes",
+          "Almost never",
+          "Never",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How often have you been able to achieve an orgasm with anal penetration?",
+        "domain": "Orgasm",
+        "response options": [
+          "Always",
+          "Almost always",
+          "Sometimes",
+          "Almost never",
+          "Never",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How satisfied are you with the amount of sexual activity you have?",
+        "domain": "Satisfaction",
+        "response options": [
+          "Very satisfied",
+          "Slightly satisfied",
+          "Neither satisfied nor unsatisfied",
+          "Slightly unsatisfied",
+          "Very unsatisfied",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How satisfied are you with the feeling of vaginal penetration?",
+        "domain": "Satisfaction",
+        "response options": [
+          "Very satisfied",
+          "Slightly satisfied",
+          "Neither satisfied nor unsatisfied",
+          "Slightly unsatisfied",
+          "Very unsatisfied",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How satisfied are you with the depth of your vagina?",
+        "domain": "Satisfaction",
+        "response options": [
+          "Very satisfied",
+          "Slightly satisfied",
+          "Neither satisfied nor unsatisfied",
+          "Slightly unsatisfied",
+          "Very unsatisfied",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How satisfied are you with the circumference of your vagina?",
+        "domain": "Satisfaction",
+        "response options": [
+          "Very satisfied",
+          "Slightly satisfied",
+          "Neither satisfied nor unsatisfied",
+          "Slightly unsatisfied",
+          "Very unsatisfied",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How often do you experience pain during vaginal penetration?",
+        "domain": "Pain",
+        "response options": [
+          "Never",
+          "Almost never",
+          "Sometimes",
+          "Almost always",
+          "Always",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How would you rate the intensity of pain you experience during vaginal penetration?",
+        "domain": "Pain",
+        "response options": [
+          "Very low or absent",
+          "Low",
+          "Not too high, Not too low",
+          "High",
+          "Very high",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How often do you experience pain with clitoral stimulation?",
+        "domain": "Pain",
+        "response options": [
+          "Never",
+          "Almost never",
+          "Sometimes",
+          "Almost always",
+          "Always",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How would you rate the intensity of pain you experience with clitoral stimulation?",
+        "domain": "Pain",
+        "response options": [
+          "Very low or absent",
+          "Low",
+          "Not too high, Not too low",
+          "High",
+          "Very high",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How often do you experience pain with arousal?",
+        "domain": "Pain",
+        "response options": [
+          "Never",
+          "Almost never",
+          "Sometimes",
+          "Almost always",
+          "Always",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How would you rate the intensity of pain you experience with arousal?",
+        "domain": "Pain",
+        "response options": [
+          "Very low or absent",
+          "Low",
+          "Not too high, Not too low",
+          "High",
+          "Very high",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How would you rate the sensitivity of your clitoris? (sensitivity describes awareness of light touch)",
+        "domain": "Anatomy",
+        "response options": [
+          "Very high",
+          "High",
+          "Not too high, Not too low",
+          "Low",
+          "Very low or absent",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How satisfied are you with the sensitivity of your clitoris? (sensitivity describes awareness of light touch)",
+        "domain": "Anatomy",
+        "response options": [
+          "Very satisfied",
+          "Slightly satisfied",
+          "Neither satisfied nor unsatisfied",
+          "Slightly unsatisfied",
+          "Very unsatisfied",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How would you rate the sensitivity of your labia majora (outer lips of the vulva)? (sensitivity describes awareness of light touch)",
+        "domain": "Anatomy",
+        "response options": [
+          "Very high",
+          "High",
+          "Not too high, Not too low",
+          "Low",
+          "Very low or absent",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How satisfied are you with the sensitivity of your labia majora (outer lips of vulva)? (sensitivity describes awareness of light touch)",
+        "domain": "Anatomy",
+        "response options": [
+          "Very satisfied",
+          "Slightly satisfied",
+          "Neither satisfied nor unsatisfied",
+          "Slightly unsatisfied",
+          "Very unsatisfied",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How would you rate the sensitivity of your labia minora (inner lips of the vulva)? (sensitivity describes awareness of light touch)",
+        "domain": "Anatomy",
+        "response options": [
+          "Very high",
+          "High",
+          "Not too high, Not too low",
+          "Low",
+          "Very low or absent",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "How satisfied are you with the sensitivity of your labia minora (inner lips of vulva)? (sensitivity describes awareness of light touch)",
+        "domain": "Anatomy",
+        "response options": [
+          "Very satisfied",
+          "Slightly satisfied",
+          "Neither satisfied nor unsatisfied",
+          "Slightly unsatisfied",
+          "Very unsatisfied",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "During vaginal penetration, how would you rate the sensitivity of your prostate (erectile tissue between bladder and rectum)? (sensitivity describes awareness of touch/pressure)",
+        "domain": "Anatomy",
+        "response options": [
+          "Very high",
+          "High",
+          "Not too high, Not too low",
+          "Low",
+          "Very low or absent",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      },
+      {
+        "question": "During vaginal penetration, how satisfied are you with the sensitivity of your prostate (erectile tissue between bladder and rectum)? (sensitivity describes awareness of touch/pressure)",
+        "domain": "Anatomy",
+        "response options": [
+          "Very satisfied",
+          "Slightly satisfied",
+          "Neither satisfied nor unsatisfied",
+          "Slightly unsatisfied",
+          "Very unsatisfied",
+          "I don't know or Prefer not to answer",
+          "N/A"
+        ],
+        "score": [2, 1, 0, -1, -2, 0, 0]
+      }
+    ];
+
+    // Group questions by domain
+    const domains = {};
+    survey.forEach((q, idx) => {
+      if (!domains[q.domain]) domains[q.domain] = [];
+      domains[q.domain].push({ ...q, idx });
+    });
+
+    // Render questions grouped by domain
+    const form = document.getElementById('survey-form');
+    Object.keys(domains).forEach(domain => {
+      const fieldset = document.createElement('fieldset');
+      const legend = document.createElement('legend');
+      legend.textContent = domain;
+      fieldset.appendChild(legend);
+
+      domains[domain].forEach(q => {
+        const div = document.createElement('div');
+        div.className = 'question';
+        const qid = `q${q.idx}`;
+        const label = document.createElement('label');
+        label.innerHTML = `<strong>${q.question}</strong>`;
+        div.appendChild(label);
+        div.appendChild(document.createElement('br'));
+
+        // Only show response options that are not "N/A" or "I don't know or Prefer not to answer"
+        q["response options"].forEach((opt, i) => {
+          if (opt === "N/A" || opt === "I don't know or Prefer not to answer") return;
+          const radioId = `${qid}_opt${i}`;
+          const radio = document.createElement('input');
+          radio.type = 'radio';
+          radio.name = qid;
+          radio.value = i;
+          radio.id = radioId;
+          const optLabel = document.createElement('label');
+          optLabel.setAttribute('for', radioId);
+          optLabel.textContent = opt;
+          div.appendChild(radio);
+          div.appendChild(optLabel);
+          div.appendChild(document.createElement('br'));
+        });
+
+        fieldset.appendChild(div);
+      });
+
+      form.appendChild(fieldset);
+    });
+
+    function calculateScores() {
+      const domainScores = {};
+      Object.keys(domains).forEach(domain => domainScores[domain] = 0);
+      let totalScore = 0;
+      let skipped = 0;
+
+      survey.forEach((q, idx) => {
+        const qid = `q${idx}`;
+        const radios = document.getElementsByName(qid);
+        let selected = -1;
+        for (let i = 0; i < radios.length; i++) {
+          if (radios[i].checked) {
+            selected = parseInt(radios[i].value, 10);
+            break;
+          }
+        }
+        if (selected === -1) {
+          skipped++;
+          // Skipped = 0 points
+          domainScores[q.domain] += 0;
+          totalScore += 0;
+        } else {
+          const score = q.score[selected];
+          domainScores[q.domain] += score;
+          totalScore += score;
+        }
+      });
+
+      // Show results
+      const resultsDiv = document.getElementById('results');
+      let html = "<h2>Survey Results</h2>";
+      html += "<table class='score-table'><tr><th>Domain</th><th>Domain Score</th></tr>";
+      Object.keys(domainScores).forEach(domain => {
+        html += `<tr><td>${domain}</td><td>${domainScores[domain]}</td></tr>`;
+      });
+      html += `<tr><th>Total Score</th><th>${totalScore}</th></tr>`;
+      html += "</table>";
+      if (skipped > 0) {
+        html += `<p style="color:#c00"><strong>Note:</strong> You skipped ${skipped} question(s). Skipped questions are scored as 0.</p>`;
+      }
+      resultsDiv.innerHTML = html;
+      resultsDiv.style.display = 'block';
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
