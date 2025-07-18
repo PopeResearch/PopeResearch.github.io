@@ -1,0 +1,12 @@
+name: "PopeResearch"
+output_dir: "docs"
+navbar:
+  title: "PopeResearch"
+  left:
+    - text: "Home"
+      href: index.html
+output:
+  html_document:
+    theme: lumen
+    css: style.css
+
